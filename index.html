@@ -284,6 +284,64 @@
         .warning-badge svg {
             margin-right: 0.5rem;
         }
+        
+        .word-list-modal {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .word-list-item {
+            transition: all 0.2s ease;
+        }
+        
+        .word-list-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #4f46e5;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
@@ -297,6 +355,13 @@
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-xl font-semibold text-gray-800">Current Deck: <span id="current-deck-name">Everyday Objects</span></h2>
                 <div class="flex space-x-2">
+                    <button id="view-all-btn" class="btn bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-2 px-4 rounded-lg flex items-center" onclick="openWordListModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                        </svg>
+                        View All Words
+                    </button>
                     <button id="quiz-btn" class="btn bg-green-100 hover:bg-green-200 text-green-700 font-medium py-2 px-4 rounded-lg flex items-center" onclick="openQuizModal()">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
@@ -317,10 +382,19 @@
             </div>
         </div>
         
-        <!-- Mode Tabs -->
-        <div class="mode-tabs">
-            <div class="mode-tab active" id="flashcard-tab" onclick="switchMode('flashcard')">Flashcards</div>
-            <div class="mode-tab" id="quiz-tab" onclick="switchMode('quiz')">Quiz</div>
+        <div class="flex justify-between items-center mb-4">
+            <div class="mode-tabs">
+                <div class="mode-tab active" id="flashcard-tab" onclick="switchMode('flashcard')">Flashcards</div>
+                <div class="mode-tab" id="quiz-tab" onclick="switchMode('quiz')">Quiz</div>
+            </div>
+            
+            <div class="flex items-center" id="show-all-toggle-container">
+                <span class="text-sm text-gray-600 mr-2">Show All Words:</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="show-all-toggle" onchange="toggleShowAllWords()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
         </div>
         
         <!-- Flashcard Mode Content -->
@@ -328,7 +402,7 @@
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-sm font-medium text-gray-700">Progress: <span id="progress-text">1/10</span></span>
-                    <span class="text-sm font-medium text-gray-700">Mastered: <span id="mastered-count">0</span>/10</span>
+                    <span class="text-sm font-medium text-gray-700">Mastered: <span id="mastered-count">0</span>/<span id="total-cards">10</span></span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress" id="progress-fill" style="width: 10%"></div>
@@ -517,6 +591,38 @@
         </div>
     </div>
     
+    <!-- Word List Modal -->
+    <div id="word-list-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeWordListModal()">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">All Words in <span id="word-list-deck-name">Everyday Objects</span></h2>
+            
+            <div class="mb-4">
+                <input type="text" id="word-search" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Search words...">
+            </div>
+            
+            <div class="word-list-modal">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Definition</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Emoji</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="word-list-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Word list will be dynamically generated -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg" onclick="closeWordListModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Quiz Modal -->
     <div id="quiz-modal" class="modal">
         <div class="modal-content">
@@ -611,11 +717,12 @@
         // Flashcard mode variables
         let currentDeckName = "Everyday Objects";
         let currentDeck = [];
-        let activeCards = []; // The 10 randomly selected cards for the current session
+        let activeCards = []; // The cards for the current session (10 random or all)
         let currentCardIndex = 0;
         let isFlipped = false;
         const cardsPerSession = 10;
         let deckToDelete = ""; // Store the name of the deck to delete
+        let showAllWords = false; // Toggle for showing all words or just 10 random ones
         
         // Quiz mode variables
         let currentMode = "flashcard"; // "flashcard" or "quiz"
@@ -632,11 +739,13 @@
         const progressText = document.getElementById('progress-text');
         const progressFill = document.getElementById('progress-fill');
         const masteredCount = document.getElementById('mastered-count');
+        const totalCardsElement = document.getElementById('total-cards');
         const ratingButtons = document.getElementById('rating-buttons');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const currentDeckNameElement = document.getElementById('current-deck-name');
         const deckButtonsContainer = document.getElementById('deck-buttons');
+        const showAllToggle = document.getElementById('show-all-toggle');
         
         // DOM Elements - Quiz Mode
         const quizWarning = document.getElementById('quiz-warning');
@@ -659,10 +768,14 @@
         
         // DOM Elements - Modals
         const importModal = document.getElementById('import-modal');
+        const wordListModal = document.getElementById('word-list-modal');
         const quizModal = document.getElementById('quiz-modal');
         const confirmDeleteModal = document.getElementById('confirm-delete-modal');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
         const modalStartQuizBtn = document.getElementById('modal-start-quiz-btn');
+        const wordListDeckName = document.getElementById('word-list-deck-name');
+        const wordListBody = document.getElementById('word-list-body');
+        const wordSearch = document.getElementById('word-search');
         
         // DOM Elements - Mode Tabs
         const flashcardTab = document.getElementById('flashcard-tab');
@@ -671,6 +784,7 @@
         const quizMode = document.getElementById('quiz-mode');
         const appSubtitle = document.getElementById('app-subtitle');
         const appInstructions = document.getElementById('app-instructions');
+        const showAllToggleContainer = document.getElementById('show-all-toggle-container');
         
         // Initialize the app
         function init() {
@@ -699,6 +813,17 @@
             // Set default quiz length
             document.querySelector('.quiz-length-btn[data-length="10"]').classList.add('bg-indigo-600', 'text-white');
             document.querySelector('.modal-quiz-length-btn[data-length="10"]').classList.add('bg-indigo-600', 'text-white');
+            
+            // Add search functionality to word list
+            wordSearch.addEventListener('input', function() {
+                populateWordList(this.value);
+            });
+        }
+        
+        // Toggle between showing all words or just 10 random ones
+        function toggleShowAllWords() {
+            showAllWords = showAllToggle.checked;
+            loadDeck(currentDeckName); // Reload the deck with the new setting
         }
         
         // Switch between flashcard and quiz modes
@@ -712,6 +837,7 @@
                 quizMode.classList.add('hidden');
                 appSubtitle.textContent = 'Click the card to flip and reveal the translation';
                 appInstructions.classList.remove('hidden');
+                showAllToggleContainer.classList.remove('hidden');
             } else {
                 flashcardTab.classList.remove('active');
                 quizTab.classList.add('active');
@@ -719,12 +845,71 @@
                 quizMode.classList.remove('hidden');
                 appSubtitle.textContent = 'Test your knowledge with multiple-choice questions';
                 appInstructions.classList.add('hidden');
+                showAllToggleContainer.classList.add('hidden');
                 
                 // Reset quiz UI to setup state
                 resetQuiz();
                 
                 // Check if we have enough words for the quiz
                 checkQuizLength();
+            }
+        }
+        
+        // Open the word list modal
+        function openWordListModal() {
+            wordListModal.style.display = 'block';
+            wordListDeckName.textContent = currentDeckName;
+            populateWordList();
+        }
+        
+        // Close the word list modal
+        function closeWordListModal() {
+            wordListModal.style.display = 'none';
+            wordSearch.value = '';
+        }
+        
+        // Populate the word list table
+        function populateWordList(searchTerm = '') {
+            wordListBody.innerHTML = '';
+            
+            const filteredWords = searchTerm 
+                ? currentDeck.filter(card => 
+                    card.term.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                    card.definition.toLowerCase().includes(searchTerm.toLowerCase()))
+                : currentDeck;
+            
+            filteredWords.forEach(card => {
+                const row = document.createElement('tr');
+                row.className = 'word-list-item';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${card.term}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${card.definition}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-xl">${card.emoji}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${card.mastered ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                            ${card.mastered ? 'Mastered' : 'Learning'}
+                        </span>
+                    </td>
+                `;
+                
+                wordListBody.appendChild(row);
+            });
+            
+            if (filteredWords.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                        No words found matching "${searchTerm}"
+                    </td>
+                `;
+                wordListBody.appendChild(emptyRow);
             }
         }
         
@@ -1049,8 +1234,12 @@
                 // Reset mastered status for all cards in the deck
                 currentDeck.forEach(card => card.mastered = false);
                 
-                // Select 10 random cards (or fewer if deck is smaller)
-                selectRandomCards();
+                // Select cards for the session based on the showAllWords toggle
+                if (showAllWords) {
+                    activeCards = [...currentDeck]; // Use all cards
+                } else {
+                    selectRandomCards(); // Select 10 random cards
+                }
                 
                 // Update the deck buttons to show the active deck
                 updateDeckButtons();
@@ -1187,9 +1376,10 @@
             progressText.textContent = `${currentCardIndex + 1}/${activeCards.length}`;
             progressFill.style.width = `${((currentCardIndex + 1) / activeCards.length) * 100}%`;
             
-            // Update mastered count
+            // Update mastered count and total cards
             const masteredTotal = activeCards.filter(card => card.mastered).length;
             masteredCount.textContent = masteredTotal;
+            totalCardsElement.textContent = activeCards.length;
             
             // Reset card to front side if it was flipped
             if (isFlipped) {
@@ -1272,8 +1462,13 @@
         }
         
         function restartDeck() {
-            // Re-select random cards
-            selectRandomCards();
+            // Re-select cards based on the showAllWords toggle
+            if (showAllWords) {
+                activeCards = [...currentDeck]; // Use all cards
+            } else {
+                selectRandomCards(); // Select 10 random cards
+            }
+            
             currentCardIndex = 0;
             updateCard();
         }
@@ -1281,5 +1476,5 @@
         // Initialize the app
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93146026e6dd8273',t:'MTc0NDgxMzc3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93146dcdf34b4a40',t:'MTc0NDgxNDMzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
