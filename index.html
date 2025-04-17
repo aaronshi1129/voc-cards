@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +17,7 @@
             height: 300px;
             width: 100%;
             max-width: 500px;
+            cursor: pointer;
         }
         
         .flashcard-inner {
@@ -73,14 +74,20 @@
         
         .btn {
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             transform: translateY(-2px);
         }
         
-        .btn:active {
+        .btn:active:not(:disabled) {
             transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         @keyframes bounce {
@@ -342,56 +349,139 @@
         input:checked + .toggle-slider:before {
             transform: translateX(26px);
         }
+        
+        /* Actions dropdown menu */
+        .actions-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .actions-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            min-width: 200px;
+            padding: 0.5rem 0;
+            display: none;
+        }
+        
+        .actions-menu.show {
+            display: block;
+        }
+        
+        .actions-menu .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #374151;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .actions-menu .menu-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .actions-menu .menu-item svg {
+            margin-right: 0.75rem;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 640px) {
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .mode-tab {
+                padding: 0.75rem 1rem;
+            }
+            
+            .flashcard {
+                height: 250px;
+            }
+            
+            .rating-buttons-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .rating-buttons-container .btn {
+                margin-bottom: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-8">
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-6 md:p-8">
         <div class="text-center mb-6">
             <h1 class="text-3xl font-bold text-indigo-700 mb-2">Vocabulary Flashcards</h1>
             <p class="text-gray-600" id="app-subtitle">Click the card to flip and reveal the translation</p>
         </div>
 
         <div id="deck-selection" class="mb-6">
-            <div class="flex justify-between items-center mb-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
                 <h2 class="text-xl font-semibold text-gray-800">Current Deck: <span id="current-deck-name">Everyday Objects</span></h2>
-                <div class="flex space-x-2">
-                    <button id="view-all-btn" class="btn bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-2 px-4 rounded-lg flex items-center" onclick="openWordListModal()">
+                
+                <!-- Actions Dropdown Menu -->
+                <div class="actions-dropdown">
+                    <button id="actions-btn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
                         </svg>
-                        View All Words
+                        Menu
                     </button>
-                    <button id="quiz-btn" class="btn bg-green-100 hover:bg-green-200 text-green-700 font-medium py-2 px-4 rounded-lg flex items-center" onclick="openQuizModal()">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
-                        </svg>
-                        Quiz Mode
-                    </button>
-                    <button id="import-btn" class="btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-4 rounded-lg flex items-center" onclick="openImportModal()">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
-                        Import Deck
-                    </button>
+                    <div id="actions-menu" class="actions-menu">
+                        <div class="menu-item" id="view-all-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                            </svg>
+                            View All Words
+                        </div>
+                        <div class="menu-item" id="quiz-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                            </svg>
+                            Quiz Mode
+                        </div>
+                        <div class="menu-item" id="import-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Import Deck
+                        </div>
+                    </div>
                 </div>
             </div>
+            
             <div class="flex flex-wrap gap-2 mb-4" id="deck-buttons">
                 <!-- Deck buttons will be added here dynamically -->
             </div>
         </div>
         
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
             <div class="mode-tabs">
-                <div class="mode-tab active" id="flashcard-tab" onclick="switchMode('flashcard')">Flashcards</div>
-                <div class="mode-tab" id="quiz-tab" onclick="switchMode('quiz')">Quiz</div>
+                <div class="mode-tab active" id="flashcard-tab">Flashcards</div>
+                <div class="mode-tab" id="quiz-tab">Quiz</div>
             </div>
             
             <div class="flex items-center" id="show-all-toggle-container">
                 <span class="text-sm text-gray-600 mr-2">Show All Words:</span>
                 <label class="toggle-switch">
-                    <input type="checkbox" id="show-all-toggle" onchange="toggleShowAllWords()">
+                    <input type="checkbox" id="show-all-toggle">
                     <span class="toggle-slider"></span>
                 </label>
             </div>
@@ -426,25 +516,25 @@
             </div>
             
             <div id="rating-buttons" class="flex justify-center space-x-3 mb-8 opacity-0 transition-opacity duration-300">
-                <button class="btn bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-4 rounded-lg" onclick="rateCard(1)">
+                <button class="btn bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-4 rounded-lg" id="rate-1-btn">
                     Didn't Know
                 </button>
-                <button class="btn bg-yellow-100 hover:bg-yellow-200 text-yellow-700 font-medium py-2 px-4 rounded-lg" onclick="rateCard(2)">
+                <button class="btn bg-yellow-100 hover:bg-yellow-200 text-yellow-700 font-medium py-2 px-4 rounded-lg" id="rate-2-btn">
                     Somewhat Knew
                 </button>
-                <button class="btn bg-green-100 hover:bg-green-200 text-green-700 font-medium py-2 px-4 rounded-lg" onclick="rateCard(3)">
+                <button class="btn bg-green-100 hover:bg-green-200 text-green-700 font-medium py-2 px-4 rounded-lg" id="rate-3-btn">
                     Knew It!
                 </button>
             </div>
             
             <div class="flex justify-between">
-                <button id="prev-btn" class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center" onclick="prevCard()" disabled>
+                <button id="prev-btn" class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center" disabled>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
                     Previous
                 </button>
-                <button id="next-btn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center" onclick="nextCard()">
+                <button id="next-btn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center">
                     Next
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
@@ -453,7 +543,7 @@
             </div>
             
             <div class="mt-8 text-center">
-                <button id="restart-btn" class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg" onclick="restartDeck()">
+                <button id="restart-btn" class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg">
                     Restart Deck
                 </button>
             </div>
@@ -475,11 +565,11 @@
                     <p class="text-gray-700 mb-3">Select number of questions:</p>
                     <div class="flex justify-center space-x-4">
                         <button class="btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-6 rounded-lg quiz-length-btn" data-length="5">5</button>
-                        <button class="btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-6 rounded-lg quiz-length-btn" data-length="10">10</button>
+                        <button class="btn bg-indigo-600 text-white font-medium py-2 px-6 rounded-lg quiz-length-btn" data-length="10">10</button>
                         <button class="btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-6 rounded-lg quiz-length-btn" data-length="20">20</button>
                     </div>
                 </div>
-                <button id="start-quiz-btn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg" onclick="startQuiz()">
+                <button id="start-quiz-btn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg">
                     Start Quiz
                 </button>
             </div>
@@ -543,10 +633,10 @@
                 </div>
                 
                 <div class="flex justify-center space-x-4">
-                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-6 rounded-lg" onclick="resetQuiz()">
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-6 rounded-lg" id="new-quiz-btn">
                         New Quiz
                     </button>
-                    <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg" onclick="switchMode('flashcard')">
+                    <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg" id="back-to-flashcards-btn">
                         Back to Flashcards
                     </button>
                 </div>
@@ -570,7 +660,7 @@
     <!-- Import Modal -->
     <div id="import-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeImportModal()">&times;</span>
+            <span class="close" id="close-import-modal">&times;</span>
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Import Flashcard Deck</h2>
             
             <div class="mb-4">
@@ -585,8 +675,8 @@
             </div>
             
             <div class="flex justify-end">
-                <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg mr-2" onclick="closeImportModal()">Cancel</button>
-                <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg" onclick="importDeck()">Import Deck</button>
+                <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg mr-2" id="cancel-import-btn">Cancel</button>
+                <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg" id="confirm-import-btn">Import Deck</button>
             </div>
         </div>
     </div>
@@ -594,7 +684,7 @@
     <!-- Word List Modal -->
     <div id="word-list-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeWordListModal()">&times;</span>
+            <span class="close" id="close-word-list-modal">&times;</span>
             <h2 class="text-2xl font-bold text-gray-800 mb-4">All Words in <span id="word-list-deck-name">Everyday Objects</span></h2>
             
             <div class="mb-4">
@@ -602,51 +692,25 @@
             </div>
             
             <div class="word-list-modal">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Definition</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Emoji</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="word-list-body" class="bg-white divide-y divide-gray-200">
-                        <!-- Word list will be dynamically generated -->
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Definition</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Emoji</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="word-list-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Word list will be dynamically generated -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="mt-6 flex justify-end">
-                <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg" onclick="closeWordListModal()">Close</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Quiz Modal -->
-    <div id="quiz-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeQuizModal()">&times;</span>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Start Quiz</h2>
-            
-            <div class="mb-6">
-                <p class="text-gray-700 mb-3">Select number of questions:</p>
-                <div class="flex space-x-4">
-                    <button class="btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-6 rounded-lg modal-quiz-length-btn" data-length="5">5</button>
-                    <button class="btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-6 rounded-lg modal-quiz-length-btn" data-length="10">10</button>
-                    <button class="btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-6 rounded-lg modal-quiz-length-btn" data-length="20">20</button>
-                </div>
-                <div id="modal-quiz-warning" class="warning-badge mt-4 hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Not enough words in the deck for the selected quiz length.</span>
-                </div>
-            </div>
-            
-            <div class="flex justify-end">
-                <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg mr-2" onclick="closeQuizModal()">Cancel</button>
-                <button id="modal-start-quiz-btn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg" onclick="startQuizFromModal()">Start Quiz</button>
+                <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg" id="close-word-list-btn">Close</button>
             </div>
         </div>
     </div>
@@ -657,7 +721,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">Delete Deck</h2>
             <p class="mb-6">Are you sure you want to delete this deck? This action cannot be undone.</p>
             <div class="flex justify-center space-x-4">
-                <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg" onclick="closeConfirmDeleteModal()">Cancel</button>
+                <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg" id="cancel-delete-btn">Cancel</button>
                 <button id="confirm-delete-btn" class="btn bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg">Delete</button>
             </div>
         </div>
@@ -667,36 +731,36 @@
         // All available decks
         const allDecks = {
             "Everyday Objects": [
-                { term: "Chair", definition: "椅子", emoji: "🪑", mastered: false },
-                { term: "Table", definition: "桌子", emoji: "🛋️", mastered: false },
-                { term: "Pen", definition: "原子筆", emoji: "🖊️", mastered: false },
-                { term: "Pencil", definition: "鉛筆", emoji: "✏️", mastered: false },
-                { term: "Book", definition: "書本", emoji: "📚", mastered: false },
-                { term: "Phone", definition: "手機", emoji: "📱", mastered: false },
-                { term: "Computer", definition: "電腦", emoji: "💻", mastered: false },
-                { term: "Bag", definition: "包包", emoji: "👜", mastered: false },
-                { term: "Glasses", definition: "眼鏡", emoji: "👓", mastered: false },
-                { term: "Shoes", definition: "鞋子", emoji: "👟", mastered: false },
-                { term: "Towel", definition: "毛巾", emoji: "🧻", mastered: false },
-                { term: "Spoon", definition: "湯匙", emoji: "🥄", mastered: false },
-                { term: "Fork", definition: "叉子", emoji: "🍴", mastered: false },
-                { term: "Knife", definition: "刀子", emoji: "🔪", mastered: false },
-                { term: "Plate", definition: "盤子", emoji: "🍽️", mastered: false },
-                { term: "Cup", definition: "杯子", emoji: "☕", mastered: false },
-                { term: "Clock", definition: "時鐘", emoji: "🕰️", mastered: false },
-                { term: "Bed", definition: "床", emoji: "🛏️", mastered: false },
-                { term: "Pillow", definition: "枕頭", emoji: "🛌", mastered: false },
-                { term: "Blanket", definition: "毯子", emoji: "🧣", mastered: false },
-                { term: "Soap", definition: "肥皂", emoji: "🧼", mastered: false },
-                { term: "Toothbrush", definition: "牙刷", emoji: "🪥", mastered: false },
-                { term: "Toothpaste", definition: "牙膏", emoji: "🦷", mastered: false },
-                { term: "Mirror", definition: "鏡子", emoji: "🪞", mastered: false },
-                { term: "TV", definition: "電視", emoji: "📺", mastered: false },
-                { term: "Fan", definition: "電風扇", emoji: "🌀", mastered: false },
-                { term: "Light", definition: "燈", emoji: "💡", mastered: false },
-                { term: "Refrigerator", definition: "冰箱", emoji: "🧊", mastered: false },
-                { term: "Washing machine", definition: "洗衣機", emoji: "🧺", mastered: false },
-                { term: "Umbrella", definition: "雨傘", emoji: "🌂", mastered: false }
+  { term: "Chair", definition: "椅子", emoji: "🪑", mastered: false },
+  { term: "Table", definition: "桌子", emoji: "🛋️", mastered: false },
+  { term: "Pen", definition: "原子筆", emoji: "🖊️", mastered: false },
+  { term: "Pencil", definition: "鉛筆", emoji: "✏️", mastered: false },
+  { term: "Book", definition: "書本", emoji: "📚", mastered: false },
+  { term: "Phone", definition: "手機", emoji: "📱", mastered: false },
+  { term: "Computer", definition: "電腦", emoji: "💻", mastered: false },
+  { term: "Bag", definition: "包包", emoji: "👜", mastered: false },
+  { term: "Glasses", definition: "眼鏡", emoji: "👓", mastered: false },
+  { term: "Shoes", definition: "鞋子", emoji: "👟", mastered: false },
+  { term: "Towel", definition: "毛巾", emoji: "🧻", mastered: false },
+  { term: "Spoon", definition: "湯匙", emoji: "🥄", mastered: false },
+  { term: "Fork", definition: "叉子", emoji: "🍴", mastered: false },
+  { term: "Knife", definition: "刀子", emoji: "🔪", mastered: false },
+  { term: "Plate", definition: "盤子", emoji: "🍽️", mastered: false },
+  { term: "Cup", definition: "杯子", emoji: "☕", mastered: false },
+  { term: "Clock", definition: "時鐘", emoji: "🕰️", mastered: false },
+  { term: "Bed", definition: "床", emoji: "🛏️", mastered: false },
+  { term: "Pillow", definition: "枕頭", emoji: "🛌", mastered: false },
+  { term: "Blanket", definition: "毯子", emoji: "🧣", mastered: false },
+  { term: "Soap", definition: "肥皂", emoji: "🧼", mastered: false },
+  { term: "Toothbrush", definition: "牙刷", emoji: "🪥", mastered: false },
+  { term: "Toothpaste", definition: "牙膏", emoji: "🦷", mastered: false },
+  { term: "Mirror", definition: "鏡子", emoji: "🪞", mastered: false },
+  { term: "TV", definition: "電視", emoji: "📺", mastered: false },
+  { term: "Fan", definition: "電風扇", emoji: "🌀", mastered: false },
+  { term: "Light", definition: "燈", emoji: "💡", mastered: false },
+  { term: "Refrigerator", definition: "冰箱", emoji: "🧊", mastered: false },
+  { term: "Washing machine", definition: "洗衣機", emoji: "🧺", mastered: false },
+  { term: "Umbrella", definition: "雨傘", emoji: "🌂", mastered: false }
             ],
             "Spanish Greetings": [
                 { term: "Hola", definition: "Hello", emoji: "👋", mastered: false },
@@ -708,9 +772,7 @@
                 { term: "¿Cómo estás?", definition: "How are you?", emoji: "🤔", mastered: false },
                 { term: "Mucho gusto", definition: "Nice to meet you", emoji: "🤝", mastered: false },
                 { term: "Por favor", definition: "Please", emoji: "🙏", mastered: false },
-                { term: "Gracias", definition: "Thank you", emoji: "🙏", mastered: false },
-                { term: "De nada", definition: "You're welcome", emoji: "😊", mastered: false },
-                { term: "Disculpe", definition: "Excuse me", emoji: "🙋", mastered: false }
+                { term: "Gracias", definition: "Thank you", emoji: "🙏", mastered: false }
             ]
         };
         
@@ -732,97 +794,104 @@
         let quizScore = 0;
         let quizAnswers = []; // To store user's answers for the summary
         
-        // DOM Elements - Flashcard Mode
-        const flashcardElement = document.getElementById('flashcard');
-        const termElement = document.getElementById('term');
-        const definitionElement = document.getElementById('definition');
-        const progressText = document.getElementById('progress-text');
-        const progressFill = document.getElementById('progress-fill');
-        const masteredCount = document.getElementById('mastered-count');
-        const totalCardsElement = document.getElementById('total-cards');
-        const ratingButtons = document.getElementById('rating-buttons');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const currentDeckNameElement = document.getElementById('current-deck-name');
-        const deckButtonsContainer = document.getElementById('deck-buttons');
-        const showAllToggle = document.getElementById('show-all-toggle');
-        
-        // DOM Elements - Quiz Mode
-        const quizWarning = document.getElementById('quiz-warning');
-        const modalQuizWarning = document.getElementById('modal-quiz-warning');
-        const quizSetup = document.getElementById('quiz-setup');
-        const quizQuestionContainer = document.getElementById('quiz-questions');
-        const quizResultsContainer = document.getElementById('quiz-results');
-        const quizProgressText = document.getElementById('quiz-progress-text');
-        const quizProgressFill = document.getElementById('quiz-progress-fill');
-        const quizScoreElement = document.getElementById('quiz-score');
-        const quizQuestion = document.getElementById('quiz-question');
-        const quizEmoji = document.getElementById('quiz-emoji');
-        const quizOptions = document.getElementById('quiz-options');
-        const quizNextBtn = document.getElementById('quiz-next-btn');
-        const quizFinishBtn = document.getElementById('quiz-finish-btn');
-        const finalScore = document.getElementById('final-score');
-        const finalPercentage = document.getElementById('final-percentage');
-        const finalScoreBar = document.getElementById('final-score-bar');
-        const quizSummary = document.getElementById('quiz-summary');
-        
-        // DOM Elements - Modals
-        const importModal = document.getElementById('import-modal');
-        const wordListModal = document.getElementById('word-list-modal');
-        const quizModal = document.getElementById('quiz-modal');
-        const confirmDeleteModal = document.getElementById('confirm-delete-modal');
-        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-        const modalStartQuizBtn = document.getElementById('modal-start-quiz-btn');
-        const wordListDeckName = document.getElementById('word-list-deck-name');
-        const wordListBody = document.getElementById('word-list-body');
-        const wordSearch = document.getElementById('word-search');
-        
-        // DOM Elements - Mode Tabs
-        const flashcardTab = document.getElementById('flashcard-tab');
-        const quizTab = document.getElementById('quiz-tab');
-        const flashcardMode = document.getElementById('flashcard-mode');
-        const quizMode = document.getElementById('quiz-mode');
-        const appSubtitle = document.getElementById('app-subtitle');
-        const appInstructions = document.getElementById('app-instructions');
-        const showAllToggleContainer = document.getElementById('show-all-toggle-container');
+        // Initialize the app when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', init);
         
         // Initialize the app
         function init() {
+            // Set up event listeners for all buttons and interactive elements
+            setupEventListeners();
+            
+            // Initialize the deck buttons and load the first deck
             updateDeckButtons();
             loadDeck(currentDeckName);
             
-            // Add event listeners for quiz length buttons
+            // Set default quiz length
+            document.querySelector('.quiz-length-btn[data-length="10"]').classList.add('bg-indigo-600', 'text-white');
+        }
+        
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Actions dropdown menu
+            document.getElementById('actions-btn').addEventListener('click', toggleActionsMenu);
+            document.getElementById('view-all-btn').addEventListener('click', openWordListModal);
+            document.getElementById('quiz-btn').addEventListener('click', openQuizModal);
+            document.getElementById('import-btn').addEventListener('click', openImportModal);
+            
+            // Close actions menu when clicking outside
+            document.addEventListener('click', function(event) {
+                const actionsMenu = document.getElementById('actions-menu');
+                const actionsBtn = document.getElementById('actions-btn');
+                
+                if (actionsMenu.classList.contains('show') && 
+                    !actionsBtn.contains(event.target) && 
+                    !actionsMenu.contains(event.target)) {
+                    toggleActionsMenu();
+                }
+            });
+            
+            // Flashcard interaction
+            document.getElementById('flashcard').addEventListener('click', flipCard);
+            document.getElementById('prev-btn').addEventListener('click', prevCard);
+            document.getElementById('next-btn').addEventListener('click', nextCard);
+            document.getElementById('restart-btn').addEventListener('click', restartDeck);
+            
+            // Rating buttons
+            document.getElementById('rate-1-btn').addEventListener('click', () => rateCard(1));
+            document.getElementById('rate-2-btn').addEventListener('click', () => rateCard(2));
+            document.getElementById('rate-3-btn').addEventListener('click', () => rateCard(3));
+            
+            // Mode tabs
+            document.getElementById('flashcard-tab').addEventListener('click', () => switchMode('flashcard'));
+            document.getElementById('quiz-tab').addEventListener('click', () => switchMode('quiz'));
+            
+            // Show all words toggle
+            document.getElementById('show-all-toggle').addEventListener('change', toggleShowAllWords);
+            
+            // Quiz setup
             document.querySelectorAll('.quiz-length-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    document.querySelectorAll('.quiz-length-btn').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
+                    document.querySelectorAll('.quiz-length-btn').forEach(b => {
+                        b.classList.remove('bg-indigo-600', 'text-white');
+                        b.classList.add('bg-indigo-100', 'text-indigo-700');
+                    });
+                    this.classList.remove('bg-indigo-100', 'text-indigo-700');
                     this.classList.add('bg-indigo-600', 'text-white');
                     currentQuizLength = parseInt(this.dataset.length);
                     checkQuizLength();
                 });
             });
             
-            document.querySelectorAll('.modal-quiz-length-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.modal-quiz-length-btn').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
-                    this.classList.add('bg-indigo-600', 'text-white');
-                    currentQuizLength = parseInt(this.dataset.length);
-                    checkQuizLengthModal();
-                });
-            });
+            document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
+            document.getElementById('quiz-next-btn').addEventListener('click', nextQuizQuestion);
+            document.getElementById('quiz-finish-btn').addEventListener('click', showQuizResults);
+            document.getElementById('new-quiz-btn').addEventListener('click', resetQuiz);
+            document.getElementById('back-to-flashcards-btn').addEventListener('click', () => switchMode('flashcard'));
             
-            // Set default quiz length
-            document.querySelector('.quiz-length-btn[data-length="10"]').classList.add('bg-indigo-600', 'text-white');
-            document.querySelector('.modal-quiz-length-btn[data-length="10"]').classList.add('bg-indigo-600', 'text-white');
+            // Modal controls
+            document.getElementById('close-import-modal').addEventListener('click', closeImportModal);
+            document.getElementById('cancel-import-btn').addEventListener('click', closeImportModal);
+            document.getElementById('confirm-import-btn').addEventListener('click', importDeck);
             
-            // Add search functionality to word list
-            wordSearch.addEventListener('input', function() {
+            document.getElementById('close-word-list-modal').addEventListener('click', closeWordListModal);
+            document.getElementById('close-word-list-btn').addEventListener('click', closeWordListModal);
+            document.getElementById('word-search').addEventListener('input', function() {
                 populateWordList(this.value);
             });
+            
+            document.getElementById('cancel-delete-btn').addEventListener('click', closeConfirmDeleteModal);
+            // confirm-delete-btn is set dynamically when opening the modal
+        }
+        
+        // Toggle actions menu
+        function toggleActionsMenu() {
+            const actionsMenu = document.getElementById('actions-menu');
+            actionsMenu.classList.toggle('show');
         }
         
         // Toggle between showing all words or just 10 random ones
         function toggleShowAllWords() {
-            showAllWords = showAllToggle.checked;
+            showAllWords = document.getElementById('show-all-toggle').checked;
             loadDeck(currentDeckName); // Reload the deck with the new setting
         }
         
@@ -831,21 +900,21 @@
             currentMode = mode;
             
             if (mode === 'flashcard') {
-                flashcardTab.classList.add('active');
-                quizTab.classList.remove('active');
-                flashcardMode.classList.remove('hidden');
-                quizMode.classList.add('hidden');
-                appSubtitle.textContent = 'Click the card to flip and reveal the translation';
-                appInstructions.classList.remove('hidden');
-                showAllToggleContainer.classList.remove('hidden');
+                document.getElementById('flashcard-tab').classList.add('active');
+                document.getElementById('quiz-tab').classList.remove('active');
+                document.getElementById('flashcard-mode').classList.remove('hidden');
+                document.getElementById('quiz-mode').classList.add('hidden');
+                document.getElementById('app-subtitle').textContent = 'Click the card to flip and reveal the translation';
+                document.getElementById('app-instructions').classList.remove('hidden');
+                document.getElementById('show-all-toggle-container').classList.remove('hidden');
             } else {
-                flashcardTab.classList.remove('active');
-                quizTab.classList.add('active');
-                flashcardMode.classList.add('hidden');
-                quizMode.classList.remove('hidden');
-                appSubtitle.textContent = 'Test your knowledge with multiple-choice questions';
-                appInstructions.classList.add('hidden');
-                showAllToggleContainer.classList.add('hidden');
+                document.getElementById('flashcard-tab').classList.remove('active');
+                document.getElementById('quiz-tab').classList.add('active');
+                document.getElementById('flashcard-mode').classList.add('hidden');
+                document.getElementById('quiz-mode').classList.remove('hidden');
+                document.getElementById('app-subtitle').textContent = 'Test your knowledge with multiple-choice questions';
+                document.getElementById('app-instructions').classList.add('hidden');
+                document.getElementById('show-all-toggle-container').classList.add('hidden');
                 
                 // Reset quiz UI to setup state
                 resetQuiz();
@@ -857,19 +926,23 @@
         
         // Open the word list modal
         function openWordListModal() {
-            wordListModal.style.display = 'block';
-            wordListDeckName.textContent = currentDeckName;
+            document.getElementById('word-list-modal').style.display = 'block';
+            document.getElementById('word-list-deck-name').textContent = currentDeckName;
             populateWordList();
+            
+            // Close actions menu
+            document.getElementById('actions-menu').classList.remove('show');
         }
         
         // Close the word list modal
         function closeWordListModal() {
-            wordListModal.style.display = 'none';
-            wordSearch.value = '';
+            document.getElementById('word-list-modal').style.display = 'none';
+            document.getElementById('word-search').value = '';
         }
         
         // Populate the word list table
         function populateWordList(searchTerm = '') {
+            const wordListBody = document.getElementById('word-list-body');
             wordListBody.innerHTML = '';
             
             const filteredWords = searchTerm 
@@ -916,368 +989,39 @@
         // Check if the deck has enough words for the selected quiz length
         function checkQuizLength() {
             const deckSize = currentDeck.length;
+            const quizWarning = document.getElementById('quiz-warning');
+            const startQuizBtn = document.getElementById('start-quiz-btn');
             
             if (deckSize < currentQuizLength || deckSize < 4) { // Need at least 4 words for multiple choice
                 quizWarning.classList.remove('hidden');
-                document.getElementById('start-quiz-btn').disabled = true;
-                document.getElementById('start-quiz-btn').classList.add('opacity-50', 'cursor-not-allowed');
+                startQuizBtn.disabled = true;
+                startQuizBtn.classList.add('opacity-50', 'cursor-not-allowed');
             } else {
                 quizWarning.classList.add('hidden');
-                document.getElementById('start-quiz-btn').disabled = false;
-                document.getElementById('start-quiz-btn').classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        }
-        
-        // Check quiz length for the modal
-        function checkQuizLengthModal() {
-            const deckSize = currentDeck.length;
-            
-            if (deckSize < currentQuizLength || deckSize < 4) {
-                modalQuizWarning.classList.remove('hidden');
-                modalStartQuizBtn.disabled = true;
-                modalStartQuizBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                modalQuizWarning.classList.add('hidden');
-                modalStartQuizBtn.disabled = false;
-                modalStartQuizBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                startQuizBtn.disabled = false;
+                startQuizBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
         
         // Open the quiz modal
         function openQuizModal() {
-            quizModal.style.display = 'block';
-            checkQuizLengthModal();
-        }
-        
-        // Close the quiz modal
-        function closeQuizModal() {
-            quizModal.style.display = 'none';
-        }
-        
-        // Start quiz from the modal
-        function startQuizFromModal() {
-            closeQuizModal();
             switchMode('quiz');
-            startQuiz();
-        }
-        
-        // Start the quiz
-        function startQuiz() {
-            // Check if we have enough words
-            if (currentDeck.length < currentQuizLength || currentDeck.length < 4) {
-                alert('Not enough words in the deck for a quiz. Add more words or select a shorter quiz length.');
-                return;
-            }
             
-            // Generate quiz questions
-            generateQuizQuestions();
-            
-            // Reset quiz state
-            currentQuizIndex = 0;
-            quizScore = 0;
-            quizAnswers = [];
-            
-            // Update UI
-            quizSetup.classList.add('hidden');
-            quizQuestionContainer.classList.remove('hidden');
-            quizResultsContainer.classList.add('hidden');
-            
-            // Show first question
-            showQuizQuestion();
-        }
-        
-        // Generate quiz questions
-        function generateQuizQuestions() {
-            // Shuffle the deck
-            const shuffledDeck = [...currentDeck].sort(() => Math.random() - 0.5);
-            
-            // Take the required number of cards for questions
-            const questionCards = shuffledDeck.slice(0, currentQuizLength);
-            
-            // Create quiz questions
-            quizQuestions = questionCards.map(card => {
-                // Get 3 random incorrect options
-                const incorrectOptions = getRandomIncorrectOptions(card.definition, 3);
-                
-                // Create options array with correct answer and incorrect options
-                const options = [...incorrectOptions, card.definition];
-                
-                // Shuffle options
-                const shuffledOptions = options.sort(() => Math.random() - 0.5);
-                
-                return {
-                    term: card.term,
-                    definition: card.definition,
-                    emoji: card.emoji,
-                    options: shuffledOptions,
-                    correctIndex: shuffledOptions.indexOf(card.definition)
-                };
-            });
-        }
-        
-        // Get random incorrect options for a quiz question
-        function getRandomIncorrectOptions(correctAnswer, count) {
-            // Get all definitions
-            const allDefinitions = currentDeck.map(card => card.definition);
-            
-            // Filter out the correct answer
-            const incorrectDefinitions = allDefinitions.filter(def => def !== correctAnswer);
-            
-            // Shuffle and take the required number
-            return incorrectDefinitions
-                .sort(() => Math.random() - 0.5)
-                .slice(0, count);
-        }
-        
-        // Show the current quiz question
-        function showQuizQuestion() {
-            const question = quizQuestions[currentQuizIndex];
-            
-            // Update progress
-            quizProgressText.textContent = `${currentQuizIndex + 1}/${quizQuestions.length}`;
-            quizProgressFill.style.width = `${((currentQuizIndex + 1) / quizQuestions.length) * 100}%`;
-            quizScoreElement.textContent = quizScore;
-            
-            // Update question
-            quizQuestion.textContent = `What is the meaning of "${question.term}"?`;
-            quizEmoji.textContent = question.emoji;
-            
-            // Clear previous options
-            quizOptions.innerHTML = '';
-            
-            // Add options
-            question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.className = 'quiz-option p-4 rounded-lg border border-gray-200 hover:border-indigo-500';
-                optionElement.innerHTML = `
-                    <div class="flex items-center">
-                        <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-3 text-gray-700 font-medium">
-                            ${String.fromCharCode(65 + index)}
-                        </div>
-                        <span class="text-lg">${option}</span>
-                    </div>
-                `;
-                optionElement.dataset.index = index;
-                optionElement.addEventListener('click', selectQuizOption);
-                quizOptions.appendChild(optionElement);
-            });
-            
-            // Hide next/finish buttons
-            quizNextBtn.classList.add('hidden');
-            quizFinishBtn.classList.add('hidden');
-        }
-        
-        // Handle quiz option selection
-        function selectQuizOption(e) {
-            // If already answered, do nothing
-            if (quizNextBtn.classList.contains('hidden') && quizFinishBtn.classList.contains('hidden')) {
-                const selectedOption = e.currentTarget;
-                const selectedIndex = parseInt(selectedOption.dataset.index);
-                const question = quizQuestions[currentQuizIndex];
-                const isCorrect = selectedIndex === question.correctIndex;
-                
-                // Mark all options
-                document.querySelectorAll('.quiz-option').forEach((option, index) => {
-                    option.classList.add(index === question.correctIndex ? 'correct' : 'incorrect');
-                    option.removeEventListener('click', selectQuizOption);
-                });
-                
-                // Mark selected option
-                selectedOption.classList.add('selected');
-                
-                // Update score if correct
-                if (isCorrect) {
-                    quizScore++;
-                    quizScoreElement.textContent = quizScore;
-                }
-                
-                // Store answer for summary
-                quizAnswers.push({
-                    term: question.term,
-                    definition: question.definition,
-                    emoji: question.emoji,
-                    selectedIndex: selectedIndex,
-                    correctIndex: question.correctIndex,
-                    isCorrect: isCorrect
-                });
-                
-                // Show next or finish button
-                if (currentQuizIndex < quizQuestions.length - 1) {
-                    quizNextBtn.classList.remove('hidden');
-                    quizNextBtn.onclick = nextQuizQuestion;
-                } else {
-                    quizFinishBtn.classList.remove('hidden');
-                    quizFinishBtn.onclick = showQuizResults;
-                }
-            }
-        }
-        
-        // Move to the next quiz question
-        function nextQuizQuestion() {
-            currentQuizIndex++;
-            showQuizQuestion();
-        }
-        
-        // Show quiz results
-        function showQuizResults() {
-            quizQuestionContainer.classList.add('hidden');
-            quizResultsContainer.classList.remove('hidden');
-            
-            // Update final score
-            finalScore.textContent = `${quizScore}/${quizQuestions.length}`;
-            const percentage = Math.round((quizScore / quizQuestions.length) * 100);
-            finalPercentage.textContent = `${percentage}%`;
-            finalScoreBar.style.width = `${percentage}%`;
-            
-            // Generate summary
-            quizSummary.innerHTML = '';
-            
-            quizAnswers.forEach((answer, index) => {
-                const card = document.createElement('div');
-                card.className = `quiz-result-card p-4 ${answer.isCorrect ? 'bg-green-50 border-l-4 border-green-500' : 'bg-red-50 border-l-4 border-red-500'}`;
-                
-                card.innerHTML = `
-                    <div class="flex items-center mb-2">
-                        <span class="text-2xl mr-2">${answer.emoji}</span>
-                        <h4 class="text-lg font-semibold">${answer.term}</h4>
-                    </div>
-                    <p class="text-gray-700 mb-1">Correct: ${answer.definition}</p>
-                    ${!answer.isCorrect ? `<p class="text-red-600">Your answer: ${quizQuestions[index].options[answer.selectedIndex]}</p>` : ''}
-                `;
-                
-                quizSummary.appendChild(card);
-            });
-        }
-        
-        // Reset quiz to setup state
-        function resetQuiz() {
-            quizSetup.classList.remove('hidden');
-            quizQuestionContainer.classList.add('hidden');
-            quizResultsContainer.classList.add('hidden');
-            checkQuizLength();
-        }
-        
-        // Update the deck selection buttons
-        function updateDeckButtons() {
-            deckButtonsContainer.innerHTML = '';
-            
-            Object.keys(allDecks).forEach(deckName => {
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'deck-button-container';
-                
-                const button = document.createElement('button');
-                button.className = `btn ${deckName === currentDeckName ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'} hover:bg-indigo-700 hover:text-white font-medium py-2 px-4 rounded-lg text-sm`;
-                button.textContent = deckName;
-                button.onclick = () => loadDeck(deckName);
-                
-                const actions = document.createElement('div');
-                actions.className = 'deck-actions';
-                
-                // Only allow deletion of custom decks (not the default decks)
-                if (deckName !== "Everyday Objects" && deckName !== "Spanish Greetings") {
-                    const deleteBtn = document.createElement('div');
-                    deleteBtn.className = 'delete-btn';
-                    deleteBtn.innerHTML = '×';
-                    deleteBtn.title = 'Delete deck';
-                    deleteBtn.onclick = (e) => {
-                        e.stopPropagation(); // Prevent triggering the deck selection
-                        openConfirmDeleteModal(deckName);
-                    };
-                    actions.appendChild(deleteBtn);
-                }
-                
-                buttonContainer.appendChild(button);
-                buttonContainer.appendChild(actions);
-                deckButtonsContainer.appendChild(buttonContainer);
-            });
-        }
-        
-        // Open the confirm delete modal
-        function openConfirmDeleteModal(deckName) {
-            deckToDelete = deckName;
-            confirmDeleteModal.style.display = 'block';
-            confirmDeleteBtn.onclick = () => deleteDeck(deckToDelete);
-        }
-        
-        // Close the confirm delete modal
-        function closeConfirmDeleteModal() {
-            confirmDeleteModal.style.display = 'none';
-            deckToDelete = "";
-        }
-        
-        // Delete a deck
-        function deleteDeck(deckName) {
-            if (deckName && deckName !== "Everyday Objects" && deckName !== "Spanish Greetings") {
-                // Delete the deck
-                delete allDecks[deckName];
-                
-                // If the current deck is the one being deleted, switch to Everyday Objects
-                if (currentDeckName === deckName) {
-                    loadDeck("Everyday Objects");
-                }
-                
-                // Update the deck buttons
-                updateDeckButtons();
-                
-                // Close the modal
-                closeConfirmDeleteModal();
-            }
-        }
-        
-        // Load a deck and prepare it for use
-        function loadDeck(deckName) {
-            if (allDecks[deckName]) {
-                currentDeckName = deckName;
-                currentDeckNameElement.textContent = deckName;
-                currentDeck = [...allDecks[deckName]]; // Create a copy of the deck
-                
-                // Reset mastered status for all cards in the deck
-                currentDeck.forEach(card => card.mastered = false);
-                
-                // Select cards for the session based on the showAllWords toggle
-                if (showAllWords) {
-                    activeCards = [...currentDeck]; // Use all cards
-                } else {
-                    selectRandomCards(); // Select 10 random cards
-                }
-                
-                // Update the deck buttons to show the active deck
-                updateDeckButtons();
-                
-                // Reset to the first card
-                currentCardIndex = 0;
-                updateCard();
-                
-                // If in quiz mode, check quiz length
-                if (currentMode === 'quiz') {
-                    checkQuizLength();
-                    resetQuiz();
-                }
-            }
-        }
-        
-        // Select random cards for the current session
-        function selectRandomCards() {
-            // Shuffle the deck
-            const shuffledDeck = [...currentDeck].sort(() => Math.random() - 0.5);
-            
-            // Take up to 10 cards
-            activeCards = shuffledDeck.slice(0, cardsPerSession);
-            
-            // If we have fewer than 10 cards, use what we have
-            if (activeCards.length < cardsPerSession) {
-                console.log(`Note: Deck only has ${activeCards.length} cards, using all available cards.`);
-            }
+            // Close actions menu
+            document.getElementById('actions-menu').classList.remove('show');
         }
         
         // Open the import modal
         function openImportModal() {
-            importModal.style.display = 'block';
+            document.getElementById('import-modal').style.display = 'block';
+            
+            // Close actions menu
+            document.getElementById('actions-menu').classList.remove('show');
         }
         
         // Close the import modal
         function closeImportModal() {
-            importModal.style.display = 'none';
+            document.getElementById('import-modal').style.display = 'none';
             document.getElementById('deck-name').value = '';
             document.getElementById('deck-content').value = '';
         }
@@ -1339,80 +1083,159 @@
             closeImportModal();
         }
         
-        // Add click event to flip the card
-        flashcardElement.addEventListener('click', flipCard);
+        // Open the confirm delete modal
+        function openConfirmDeleteModal(deckName) {
+            deckToDelete = deckName;
+            document.getElementById('confirm-delete-modal').style.display = 'block';
+            document.getElementById('confirm-delete-btn').onclick = () => deleteDeck(deckToDelete);
+        }
         
+        // Close the confirm delete modal
+        function closeConfirmDeleteModal() {
+            document.getElementById('confirm-delete-modal').style.display = 'none';
+            deckToDelete = "";
+        }
+        
+        // Delete a deck
+        function deleteDeck(deckName) {
+            if (deckName && deckName !== "Everyday Objects" && deckName !== "Spanish Greetings") {
+                // Delete the deck
+                delete allDecks[deckName];
+                
+                // If the current deck is the one being deleted, switch to Everyday Objects
+                if (currentDeckName === deckName) {
+                    loadDeck("Everyday Objects");
+                }
+                
+                // Update the deck buttons
+                updateDeckButtons();
+                
+                // Close the modal
+                closeConfirmDeleteModal();
+            }
+        }
+        
+        // Update the deck selection buttons
+        function updateDeckButtons() {
+            const deckButtonsContainer = document.getElementById('deck-buttons');
+            deckButtonsContainer.innerHTML = '';
+            
+            Object.keys(allDecks).forEach(deckName => {
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'deck-button-container';
+                
+                const button = document.createElement('button');
+                button.className = `btn ${deckName === currentDeckName ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'} hover:bg-indigo-700 hover:text-white font-medium py-2 px-4 rounded-lg text-sm`;
+                button.textContent = deckName;
+                button.addEventListener('click', () => loadDeck(deckName));
+                
+                const actions = document.createElement('div');
+                actions.className = 'deck-actions';
+                
+                // Only allow deletion of custom decks (not the default decks)
+                if (deckName !== "Everyday Objects" && deckName !== "Spanish Greetings") {
+                    const deleteBtn = document.createElement('div');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.title = 'Delete deck';
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent triggering the deck selection
+                        openConfirmDeleteModal(deckName);
+                    });
+                    actions.appendChild(deleteBtn);
+                }
+                
+                buttonContainer.appendChild(button);
+                buttonContainer.appendChild(actions);
+                deckButtonsContainer.appendChild(buttonContainer);
+            });
+        }
+        
+        // Load a deck and prepare it for use
+        function loadDeck(deckName) {
+            if (allDecks[deckName]) {
+                currentDeckName = deckName;
+                document.getElementById('current-deck-name').textContent = deckName;
+                currentDeck = [...allDecks[deckName]]; // Create a copy of the deck
+                
+                // Select cards for the session based on the showAllWords toggle
+                if (showAllWords) {
+                    activeCards = [...currentDeck]; // Use all cards
+                } else {
+                    selectRandomCards(); // Select 10 random cards
+                }
+                
+                // Update the deck buttons to show the active deck
+                updateDeckButtons();
+                
+                // Reset to the first card
+                currentCardIndex = 0;
+                updateCard();
+                
+                // Update total cards count
+                document.getElementById('total-cards').textContent = activeCards.length;
+                
+                // If in quiz mode, check quiz length
+                if (currentMode === 'quiz') {
+                    checkQuizLength();
+                    resetQuiz();
+                }
+            }
+        }
+        
+        // Select random cards for the current session
+        function selectRandomCards() {
+            // Shuffle the deck
+            const shuffledDeck = [...currentDeck].sort(() => Math.random() - 0.5);
+            
+            // Take up to 10 cards
+            activeCards = shuffledDeck.slice(0, Math.min(cardsPerSession, shuffledDeck.length));
+        }
+        
+        // Update the current card display
+        function updateCard() {
+            if (activeCards.length === 0) return;
+            
+            const card = activeCards[currentCardIndex];
+            document.getElementById('term').textContent = card.term;
+            document.getElementById('definition').textContent = card.definition;
+            document.querySelector('.flashcard-front span').textContent = card.emoji;
+            
+            // Update progress
+            document.getElementById('progress-text').textContent = `${currentCardIndex + 1}/${activeCards.length}`;
+            document.getElementById('progress-fill').style.width = `${((currentCardIndex + 1) / activeCards.length) * 100}%`;
+            
+            // Update mastered count
+            const masteredCount = activeCards.filter(card => card.mastered).length;
+            document.getElementById('mastered-count').textContent = masteredCount;
+            
+            // Reset card to front side
+            isFlipped = false;
+            document.getElementById('flashcard').classList.remove('flipped');
+            document.getElementById('rating-buttons').style.opacity = '0';
+            
+            // Update button states
+            document.getElementById('prev-btn').disabled = currentCardIndex === 0;
+            document.getElementById('next-btn').disabled = currentCardIndex === activeCards.length - 1;
+        }
+        
+        // Flip the flashcard
         function flipCard() {
             isFlipped = !isFlipped;
-            flashcardElement.classList.toggle('flipped');
+            document.getElementById('flashcard').classList.toggle('flipped');
             
             if (isFlipped) {
                 // Show rating buttons when card is flipped to back
                 setTimeout(() => {
-                    ratingButtons.style.opacity = '1';
+                    document.getElementById('rating-buttons').style.opacity = '1';
                 }, 300);
             } else {
                 // Hide rating buttons when card is flipped to front
-                ratingButtons.style.opacity = '0';
+                document.getElementById('rating-buttons').style.opacity = '0';
             }
         }
         
-        function updateCard() {
-            if (activeCards.length === 0) {
-                alert('No cards available in this deck.');
-                return;
-            }
-            
-            const currentCard = activeCards[currentCardIndex];
-            
-            // Update card content
-            termElement.textContent = currentCard.term;
-            definitionElement.textContent = currentCard.definition;
-            
-            // Update front emoji
-            document.querySelector('.flashcard-front span').textContent = currentCard.emoji;
-            
-            // Update progress indicators
-            progressText.textContent = `${currentCardIndex + 1}/${activeCards.length}`;
-            progressFill.style.width = `${((currentCardIndex + 1) / activeCards.length) * 100}%`;
-            
-            // Update mastered count and total cards
-            const masteredTotal = activeCards.filter(card => card.mastered).length;
-            masteredCount.textContent = masteredTotal;
-            totalCardsElement.textContent = activeCards.length;
-            
-            // Reset card to front side if it was flipped
-            if (isFlipped) {
-                flashcardElement.classList.remove('flipped');
-                isFlipped = false;
-                ratingButtons.style.opacity = '0';
-            }
-            
-            // Update button states
-            prevBtn.disabled = currentCardIndex === 0;
-            nextBtn.disabled = currentCardIndex === activeCards.length - 1;
-            
-            // Add visual indication for disabled buttons
-            if (prevBtn.disabled) {
-                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-            
-            if (nextBtn.disabled) {
-                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        }
-        
-        function nextCard() {
-            if (currentCardIndex < activeCards.length - 1) {
-                currentCardIndex++;
-                updateCard();
-            }
-        }
-        
+        // Go to the previous card
         function prevCard() {
             if (currentCardIndex > 0) {
                 currentCardIndex--;
@@ -1420,61 +1243,265 @@
             }
         }
         
-        function rateCard(rating) {
-            // Mark card as mastered if rating is 3 (Knew It!)
-            if (rating === 3) {
-                activeCards[currentCardIndex].mastered = true;
-                
-                // Also update the card in the main deck
-                const term = activeCards[currentCardIndex].term;
-                const cardInMainDeck = currentDeck.find(card => card.term === term);
-                if (cardInMainDeck) {
-                    cardInMainDeck.mastered = true;
-                }
-            } else {
-                activeCards[currentCardIndex].mastered = false;
-                
-                // Also update the card in the main deck
-                const term = activeCards[currentCardIndex].term;
-                const cardInMainDeck = currentDeck.find(card => card.term === term);
-                if (cardInMainDeck) {
-                    cardInMainDeck.mastered = false;
-                }
-            }
-            
-            // Update mastered count
-            const masteredTotal = activeCards.filter(card => card.mastered).length;
-            masteredCount.textContent = masteredTotal;
-            
-            // Move to next card if available
+        // Go to the next card
+        function nextCard() {
             if (currentCardIndex < activeCards.length - 1) {
-                setTimeout(() => {
-                    nextCard();
-                }, 300);
-            } else {
-                // If this is the last card, just flip back
-                setTimeout(() => {
-                    if (isFlipped) {
-                        flipCard();
-                    }
-                }, 300);
+                currentCardIndex++;
+                updateCard();
             }
         }
         
-        function restartDeck() {
-            // Re-select cards based on the showAllWords toggle
-            if (showAllWords) {
-                activeCards = [...currentDeck]; // Use all cards
-            } else {
-                selectRandomCards(); // Select 10 random cards
+        // Rate the current card
+        function rateCard(rating) {
+            const card = activeCards[currentCardIndex];
+            
+            // Mark as mastered if rating is 3 (Knew It!)
+            if (rating === 3) {
+                card.mastered = true;
+                
+                // Update the original card in the deck
+                const originalCardIndex = currentDeck.findIndex(c => c.term === card.term && c.definition === card.definition);
+                if (originalCardIndex !== -1) {
+                    currentDeck[originalCardIndex].mastered = true;
+                }
+                
+                // Update mastered count
+                const masteredCount = activeCards.filter(card => card.mastered).length;
+                document.getElementById('mastered-count').textContent = masteredCount;
             }
             
+            // Go to next card if available
+            if (currentCardIndex < activeCards.length - 1) {
+                nextCard();
+            } else {
+                // If this was the last card, just update the current card to show mastered status
+                updateCard();
+            }
+        }
+        
+        // Restart the current deck
+        function restartDeck() {
+            // Reset mastered status for all cards in the active deck
+            activeCards.forEach(card => card.mastered = false);
+            
+            // Reset to the first card
             currentCardIndex = 0;
             updateCard();
+            
+            // Update mastered count
+            document.getElementById('mastered-count').textContent = '0';
         }
         
-        // Initialize the app
-        init();
+        // Start the quiz
+        function startQuiz() {
+            // Check if we have enough words
+            if (currentDeck.length < currentQuizLength || currentDeck.length < 4) {
+                alert('Not enough words in the deck for a quiz. Add more words or select a shorter quiz length.');
+                return;
+            }
+            
+            // Generate quiz questions
+            generateQuizQuestions();
+            
+            // Reset quiz state
+            currentQuizIndex = 0;
+            quizScore = 0;
+            quizAnswers = [];
+            
+            // Update UI
+            document.getElementById('quiz-setup').classList.add('hidden');
+            document.getElementById('quiz-questions').classList.remove('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            
+            // Show first question
+            showQuizQuestion();
+        }
+        
+        // Generate quiz questions
+        function generateQuizQuestions() {
+            // Shuffle the deck
+            const shuffledDeck = [...currentDeck].sort(() => Math.random() - 0.5);
+            
+            // Take the required number of cards for questions
+            const questionCards = shuffledDeck.slice(0, currentQuizLength);
+            
+            // Create quiz questions
+            quizQuestions = questionCards.map(card => {
+                // Get 3 random incorrect options
+                const incorrectOptions = getRandomIncorrectOptions(card.definition, 3);
+                
+                // Create options array with correct answer and incorrect options
+                const options = [...incorrectOptions, card.definition];
+                
+                // Shuffle options
+                const shuffledOptions = options.sort(() => Math.random() - 0.5);
+                
+                return {
+                    term: card.term,
+                    definition: card.definition,
+                    emoji: card.emoji,
+                    options: shuffledOptions,
+                    correctIndex: shuffledOptions.indexOf(card.definition)
+                };
+            });
+        }
+        
+        // Get random incorrect options for a quiz question
+        function getRandomIncorrectOptions(correctAnswer, count) {
+            // Get all definitions
+            const allDefinitions = currentDeck.map(card => card.definition);
+            
+            // Filter out the correct answer
+            const incorrectDefinitions = allDefinitions.filter(def => def !== correctAnswer);
+            
+            // Shuffle and take the required number
+            return incorrectDefinitions
+                .sort(() => Math.random() - 0.5)
+                .slice(0, count);
+        }
+        
+        // Show the current quiz question
+        function showQuizQuestion() {
+            const question = quizQuestions[currentQuizIndex];
+            const quizProgressText = document.getElementById('quiz-progress-text');
+            const quizProgressFill = document.getElementById('quiz-progress-fill');
+            const quizScoreElement = document.getElementById('quiz-score');
+            const quizQuestion = document.getElementById('quiz-question');
+            const quizEmoji = document.getElementById('quiz-emoji');
+            const quizOptions = document.getElementById('quiz-options');
+            const quizNextBtn = document.getElementById('quiz-next-btn');
+            const quizFinishBtn = document.getElementById('quiz-finish-btn');
+            
+            // Update progress
+            quizProgressText.textContent = `${currentQuizIndex + 1}/${quizQuestions.length}`;
+            quizProgressFill.style.width = `${((currentQuizIndex + 1) / quizQuestions.length) * 100}%`;
+            quizScoreElement.textContent = quizScore;
+            
+            // Update question
+            quizQuestion.textContent = `What is the meaning of "${question.term}"?`;
+            quizEmoji.textContent = question.emoji;
+            
+            // Clear previous options
+            quizOptions.innerHTML = '';
+            
+            // Add options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'quiz-option p-4 rounded-lg border border-gray-200 hover:border-indigo-500';
+                optionElement.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mr-3 text-gray-700 font-medium">
+                            ${String.fromCharCode(65 + index)}
+                        </div>
+                        <span class="text-lg">${option}</span>
+                    </div>
+                `;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', selectQuizOption);
+                quizOptions.appendChild(optionElement);
+            });
+            
+            // Hide next/finish buttons
+            quizNextBtn.classList.add('hidden');
+            quizFinishBtn.classList.add('hidden');
+        }
+        
+        // Handle quiz option selection
+        function selectQuizOption(e) {
+            const quizNextBtn = document.getElementById('quiz-next-btn');
+            const quizFinishBtn = document.getElementById('quiz-finish-btn');
+            const quizScoreElement = document.getElementById('quiz-score');
+            
+            // If already answered, do nothing
+            if (quizNextBtn.classList.contains('hidden') && quizFinishBtn.classList.contains('hidden')) {
+                const selectedOption = e.currentTarget;
+                const selectedIndex = parseInt(selectedOption.dataset.index);
+                const question = quizQuestions[currentQuizIndex];
+                const isCorrect = selectedIndex === question.correctIndex;
+                
+                // Mark all options
+                document.querySelectorAll('.quiz-option').forEach((option, index) => {
+                    option.classList.add(index === question.correctIndex ? 'correct' : 'incorrect');
+                    option.removeEventListener('click', selectQuizOption);
+                });
+                
+                // Mark selected option
+                selectedOption.classList.add('selected');
+                
+                // Update score if correct
+                if (isCorrect) {
+                    quizScore++;
+                    quizScoreElement.textContent = quizScore;
+                }
+                
+                // Store answer for summary
+                quizAnswers.push({
+                    term: question.term,
+                    definition: question.definition,
+                    emoji: question.emoji,
+                    selectedIndex: selectedIndex,
+                    correctIndex: question.correctIndex,
+                    isCorrect: isCorrect
+                });
+                
+                // Show next or finish button
+                if (currentQuizIndex < quizQuestions.length - 1) {
+                    quizNextBtn.classList.remove('hidden');
+                } else {
+                    quizFinishBtn.classList.remove('hidden');
+                }
+            }
+        }
+        
+        // Move to the next quiz question
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            showQuizQuestion();
+        }
+        
+        // Show quiz results
+        function showQuizResults() {
+            document.getElementById('quiz-questions').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            
+            const finalScore = document.getElementById('final-score');
+            const finalPercentage = document.getElementById('final-percentage');
+            const finalScoreBar = document.getElementById('final-score-bar');
+            const quizSummary = document.getElementById('quiz-summary');
+            
+            // Update final score
+            finalScore.textContent = `${quizScore}/${quizQuestions.length}`;
+            const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+            finalPercentage.textContent = `${percentage}%`;
+            finalScoreBar.style.width = `${percentage}%`;
+            
+            // Generate summary
+            quizSummary.innerHTML = '';
+            
+            quizAnswers.forEach((answer, index) => {
+                const card = document.createElement('div');
+                card.className = `quiz-result-card p-4 ${answer.isCorrect ? 'bg-green-50 border-l-4 border-green-500' : 'bg-red-50 border-l-4 border-red-500'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <span class="text-2xl mr-2">${answer.emoji}</span>
+                        <h4 class="text-lg font-semibold">${answer.term}</h4>
+                    </div>
+                    <p class="text-gray-700 mb-1">Correct: ${answer.definition}</p>
+                    ${!answer.isCorrect ? `<p class="text-red-600">Your answer: ${quizQuestions[index].options[answer.selectedIndex]}</p>` : ''}
+                `;
+                
+                quizSummary.appendChild(card);
+            });
+        }
+        
+        // Reset quiz to setup state
+        function resetQuiz() {
+            document.getElementById('quiz-setup').classList.remove('hidden');
+            document.getElementById('quiz-questions').classList.add('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            checkQuizLength();
+        }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93146dcdf34b4a40',t:'MTc0NDgxNDMzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9318c219e41c843c',t:'MTc0NDg1OTcyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
